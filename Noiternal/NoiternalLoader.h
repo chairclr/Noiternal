@@ -1,5 +1,7 @@
 #pragma once
 #include "framework.h"
+#include "LuaExecutor.h"
+
 
 class NoiternalLoader
 {
@@ -9,8 +11,10 @@ private:
 
 	static bool LoadWin32Console();
 	static bool UnloadWin32Console();
-
     static void DebugConsoleThread();
+
+    static bool LoadNoitaLua();
+    static bool UnloadNoitaLua();
 
 
     static HWND _consoleHandle;
@@ -18,6 +22,7 @@ private:
     static bool _unloadNoiternal;
 
 public:
+
 	static void Load(HMODULE hMod);
 	static void Unload();
 };

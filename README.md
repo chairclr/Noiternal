@@ -2,4 +2,7 @@
 
 A dll-injection based utility for Noita
 
-Planning to add arbitrary lua execution and other features, mainly as a learning exercise and tool to help solve some of the games' secrets
+Current features:
+- An arbitrary Lua executor (No mods)
+
+Uses Luajit 2.0.4 and MinHook 1.3.3
