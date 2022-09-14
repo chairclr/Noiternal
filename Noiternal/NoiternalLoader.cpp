@@ -1,8 +1,13 @@
 #include "NoiternalLoader.h"
 
 HWND NoiternalLoader::_consoleHandle = 0;
-HMODULE NoiternalLoader::_noiternalModuleHandle = 0;
+HMODULE NoiternalLoader::NoiternalModuleHandle = 0;
 bool NoiternalLoader::_unloadNoiternal = 0;
+uintptr_t NoiternalLoader::NoitaModuleAddress = NULL;
+
+
+
+
 void NoiternalLoader::Load(HMODULE hMod)
 {
 	static bool _loaded = false;
@@ -18,18 +23,15 @@ void NoiternalLoader::Unload()
 
 void NoiternalLoader::InternalLoad(HMODULE hMod)
 {
-	_noiternalModuleHandle = hMod;
+    NoitaModuleAddress = (uintptr_t)GetModuleHandleA("noita.exe");
+	NoiternalModuleHandle = hMod;
 
-    char noiternalPath[MAX_PATH];
-    char noiternalDir[MAX_PATH];
-    GetModuleFileName(_noiternalModuleHandle, noiternalPath, sizeof(noiternalPath));
-    _splitpath_s(noiternalPath, nullptr, 0, noiternalDir, MAX_PATH, nullptr, 0, nullptr, 0);
-    SetDllDirectory(noiternalDir);
+    SetNoiternalDllDir();
 	LoadWin32Console();
     MH_Initialize();
-    LoadNoitaLua();
+    LuaExecutor::HookLua();
 
-    HANDLE h = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DebugConsoleThread, nullptr, 0, nullptr);
+    HANDLE debugConsoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DebugConsoleThread, nullptr, 0, nullptr);
 
     // need to fix this being ugly :sad:
     while (true)
@@ -38,14 +40,26 @@ void NoiternalLoader::InternalLoad(HMODULE hMod)
         Sleep(16); // ~60 fps
     }
 
-    if (h) WaitForSingleObject(h, INFINITE);
+    if (debugConsoleThread)
+    {
+        WaitForSingleObject(debugConsoleThread, 1000);
+    }
     InternalUnload();
 }
 void NoiternalLoader::InternalUnload()
 {
 	UnloadWin32Console();
-    UnloadNoitaLua();
-    FreeLibraryAndExitThread(_noiternalModuleHandle, 0);
+    LuaExecutor::UnhookLua();
+    FreeLibraryAndExitThread(NoiternalModuleHandle, 0);
+}
+
+void NoiternalLoader::SetNoiternalDllDir()
+{
+    char noiternalPath[MAX_PATH];
+    char noiternalDir[MAX_PATH];
+    GetModuleFileName(NoiternalModuleHandle, noiternalPath, sizeof(noiternalPath));
+    _splitpath_s(noiternalPath, nullptr, 0, noiternalDir, MAX_PATH, nullptr, 0, nullptr, 0);
+    SetDllDirectory(noiternalDir);
 }
 
 bool NoiternalLoader::LoadWin32Console()
@@ -55,9 +69,9 @@ bool NoiternalLoader::LoadWin32Console()
     FILE* file;
 	if (freopen_s(&file, "conin$", "r", stdin)) return false;
 	if (freopen_s(&file, "conout$", "w", stdout)) return false;
-	if (freopen_s(&file, "conout$", "w", stderr)) return false;
 
 	_consoleHandle = GetConsoleWindow();
+
 	return true;
 }
 bool NoiternalLoader::UnloadWin32Console()
@@ -85,31 +99,19 @@ void NoiternalLoader::DebugConsoleThread()
         }
         else if (s.substr(0, 5) == "eval ")
         {
-            if (LuaExecutor::GameState == nullptr)
+            if (LuaExecutor::GameState == nullptr || LuaExecutor::GameState->LuaState == nullptr)
             {
-                std::cout << "Must be injected from the title screen to execute lua\n";
+                std::cout << "Invalid Lua State\n";
                 continue;
             }
-
-            // remove the eval at the start
+        
             std::string str = s.substr(5);
-
-            luaL_dostring(LuaExecutor::GameState, str.c_str());
+        
+            luaL_dostring(LuaExecutor::GameState->LuaState, str.c_str());
         }
         else
         {
             std::cout << s << "\n";
         }
     }
-}
-
-bool NoiternalLoader::LoadNoitaLua()
-{
-    LuaExecutor::HookLua();
-    return true;
-}
-bool NoiternalLoader::UnloadNoitaLua()
-{
-    LuaExecutor::UnhookLua();
-    return true;
 }

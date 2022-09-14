@@ -72,12 +72,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <ExternalIncludePath>C:\Users\chair\source\repos\Noiternal\Noiternal\lua\include;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Users\chair\source\repos\Noiternal\Noiternal\lua\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\lib;$(LibraryPath)</LibraryPath>
+    <ExternalIncludePath>C:\Users\chair\source\repos\Noiternal\Noiternal\SDL2\include;C:\Users\chair\source\repos\Noiternal\Noiternal\lua\include;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>C:\Users\chair\source\repos\Noiternal\Noiternal\SDL2\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\lua\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>C:\Users\chair\source\repos\Noiternal\Noiternal\lua\include;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\include;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>C:\Users\chair\source\repos\Noiternal\Noiternal\lua\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\lib;$(LibraryPath)</LibraryPath>
+    <ExternalIncludePath>C:\Users\chair\source\repos\Noiternal\Noiternal\SDL2\include;C:\Users\chair\source\repos\Noiternal\Noiternal\lua\include;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>C:\Users\chair\source\repos\Noiternal\Noiternal\SDL2\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\lua\lib;C:\Users\chair\source\repos\Noiternal\Noiternal\MinHook\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExternalIncludePath>C:\Users\chair\source\repos\Noiternal\Noiternal\lua\include;$(ExternalIncludePath)</ExternalIncludePath>
@@ -100,7 +100,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>lua51.lib;MinHook.x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua51.lib;MinHook.x86.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>MinHook.x86.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
@@ -126,7 +126,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>lua51.lib;MinHook.x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua51.lib;MinHook.x86.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>MinHook.x86.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
@@ -174,7 +174,9 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="LuaExecutor.h" />
+    <ClInclude Include="LuaManager.h" />
     <ClInclude Include="NoiternalLoader.h" />
+    <ClInclude Include="std_string.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
