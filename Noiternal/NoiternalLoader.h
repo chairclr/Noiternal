@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include "LuaExecutor.h"
+#include "ImGuiRenderer.h"
 
 class NoiternalLoader
 {
@@ -22,7 +23,8 @@ public:
 
     static void SetNoiternalDllDir();
 
-	static HMODULE NoiternalModuleHandle;
+    static HMODULE NoiternalModuleHandle;
+    static HMODULE SDL2ModuleHandle;
     static uintptr_t NoitaModuleAddress;
 };
 

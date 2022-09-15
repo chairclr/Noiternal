@@ -1,9 +1,9 @@
 #pragma once
 #include "framework.h"
 #include <lua.hpp>
+#include <MinHook.h>
 #include "LuaManager.h"
 #include "std_string.h"
-#include <MinHook.h>
 #include "NoiternalLoader.h"
 
 class LuaExecutor

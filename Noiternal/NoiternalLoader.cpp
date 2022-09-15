@@ -2,6 +2,7 @@
 
 HWND NoiternalLoader::_consoleHandle = 0;
 HMODULE NoiternalLoader::NoiternalModuleHandle = 0;
+HMODULE NoiternalLoader::SDL2ModuleHandle = 0;
 bool NoiternalLoader::_unloadNoiternal = 0;
 uintptr_t NoiternalLoader::NoitaModuleAddress = NULL;
 
@@ -21,14 +22,15 @@ void NoiternalLoader::Unload()
 void NoiternalLoader::InternalLoad(HMODULE hMod)
 {
     NoitaModuleAddress = (uintptr_t)GetModuleHandleA("noita.exe");
+    SDL2ModuleHandle = GetModuleHandleA("SDL2.dll");
 	NoiternalModuleHandle = hMod;
-
-    
 
     SetNoiternalDllDir();
 	LoadWin32Console();
     MH_Initialize();
     LuaExecutor::HookLua();
+    ImGuiRenderer::CreateContext();
+    ImGuiRenderer::HookRendering();
 
     HANDLE debugConsoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DebugConsoleThread, nullptr, 0, nullptr);
 
@@ -49,6 +51,7 @@ void NoiternalLoader::InternalUnload()
 {
 	UnloadWin32Console();
     LuaExecutor::UnhookLua();
+    ImGuiRenderer::UnhookRendering();
     FreeLibraryAndExitThread(NoiternalModuleHandle, 0);
 }
 

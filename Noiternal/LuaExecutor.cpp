@@ -1,6 +1,5 @@
 #include "LuaExecutor.h"
 
-// noita.exe+0x31CDD0
 #define NOITA_NEW_LUA               0x0031CDD0
 #define NOITA_NEEDS_RESET_LUA_VAR   0x00BF10AA
 
@@ -15,12 +14,12 @@ void __fastcall LuaManagerNewStateHook(LuaManager* pThis)
 
 void ResetGameLua()
 {
+    // sus af
     *(uint8_t*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEEDS_RESET_LUA_VAR) = 0;
 }
 
 void LuaExecutor::HookLua()
 {
-
     MH_CreateHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA), LuaManagerNewStateHook, &oLuaManagerNewState);
     MH_EnableHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA));
     
