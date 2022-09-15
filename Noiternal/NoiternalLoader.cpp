@@ -5,9 +5,6 @@ HMODULE NoiternalLoader::NoiternalModuleHandle = 0;
 bool NoiternalLoader::_unloadNoiternal = 0;
 uintptr_t NoiternalLoader::NoitaModuleAddress = NULL;
 
-
-
-
 void NoiternalLoader::Load(HMODULE hMod)
 {
 	static bool _loaded = false;
@@ -25,6 +22,8 @@ void NoiternalLoader::InternalLoad(HMODULE hMod)
 {
     NoitaModuleAddress = (uintptr_t)GetModuleHandleA("noita.exe");
 	NoiternalModuleHandle = hMod;
+
+    
 
     SetNoiternalDllDir();
 	LoadWin32Console();
@@ -81,6 +80,7 @@ bool NoiternalLoader::UnloadWin32Console()
 	PostMessage(_consoleHandle, WM_CLOSE, 0, 0);
     return true;
 }
+
 void NoiternalLoader::DebugConsoleThread()
 {
     // simple console just as a demo, not important

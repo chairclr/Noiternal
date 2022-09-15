@@ -1,7 +1,6 @@
 #pragma once
 #include "framework.h"
 #include "LuaExecutor.h"
-#include <SDL.h>
 
 class NoiternalLoader
 {
