@@ -26,13 +26,15 @@ void NoiternalLoader::InternalLoad(HMODULE hMod)
 	NoiternalModuleHandle = hMod;
 
     SetNoiternalDllDir();
-	LoadWin32Console();
+
+    // temp removing this until I fully replace it with an ingame console :smile:
+	//LoadWin32Console();
     MH_Initialize();
     LuaExecutor::HookLua();
     ImGuiRenderer::CreateContext();
     ImGuiRenderer::HookRendering();
 
-    HANDLE debugConsoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DebugConsoleThread, nullptr, 0, nullptr);
+    //CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DebugConsoleThread, nullptr, 0, nullptr);
 
     // need to fix this being ugly :sad:
     while (true)
@@ -41,15 +43,11 @@ void NoiternalLoader::InternalLoad(HMODULE hMod)
         Sleep(16); // ~60 fps
     }
 
-    if (debugConsoleThread)
-    {
-        WaitForSingleObject(debugConsoleThread, 1000);
-    }
     InternalUnload();
 }
 void NoiternalLoader::InternalUnload()
 {
-	UnloadWin32Console();
+	//UnloadWin32Console();
     LuaExecutor::UnhookLua();
     ImGuiRenderer::UnhookRendering();
     FreeLibraryAndExitThread(NoiternalModuleHandle, 0);

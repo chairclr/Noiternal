@@ -1,7 +1,7 @@
 #pragma once
 #include "framework.h"
 #include <lua.hpp>
-#include <MinHook.h>
+#include "Hook.h"
 #include "LuaManager.h"
 #include "std_string.h"
 #include "NoiternalLoader.h"

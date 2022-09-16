@@ -81,6 +81,9 @@
     <ClInclude Include="ImGuiRenderer.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Hook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="ImGuiRenderer.cpp">
       <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

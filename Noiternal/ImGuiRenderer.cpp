@@ -3,30 +3,21 @@
 bool ImGuiRenderer::BackendInit = false;
 bool ImGuiRenderer::ContextInit = false;
 
-void* oSDL_GL_SwapWindow;
-void* oSDL_PollEventHook;
+Hook SDL_GL_SwapWindowHook;
+Hook SDL_PollEventHook;
 void ImGuiRenderer::HookRendering()
 {
-    void* swapWindowPtr = (void*)(GetProcAddress(NoiternalLoader::SDL2ModuleHandle, "SDL_GL_SwapWindow"));
-    void* pollEventPtr = (void*)(GetProcAddress(NoiternalLoader::SDL2ModuleHandle, "SDL_PollEvent"));
+    SDL_GL_SwapWindowHook = Hook(NoiternalLoader::SDL2ModuleHandle, "SDL_GL_SwapWindow", &SDL_GL_SwapWindowHookFunc);
+    SDL_GL_SwapWindowHook.Enable();
 
-    MH_CreateHook(swapWindowPtr, ImGuiRenderer::SDL_GL_SwapWindowHook, &oSDL_GL_SwapWindow);
-    MH_EnableHook(swapWindowPtr);
-
-    MH_CreateHook(pollEventPtr, ImGuiRenderer::SDL_PollEventHook, &oSDL_PollEventHook);
-    MH_EnableHook(pollEventPtr);
+    SDL_PollEventHook = Hook(NoiternalLoader::SDL2ModuleHandle, "SDL_PollEvent", &SDL_PollEventHookFunc);
+    SDL_PollEventHook.Enable();
 }
 
 void ImGuiRenderer::UnhookRendering()
 {
-    void* swapWindowPtr = (void*)(GetProcAddress(NoiternalLoader::SDL2ModuleHandle, "SDL_GL_SwapWindow"));
-    void* pollEventPtr = (void*)(GetProcAddress(NoiternalLoader::SDL2ModuleHandle, "SDL_PollEvent"));
-
-    MH_DisableHook(swapWindowPtr);
-    MH_RemoveHook(swapWindowPtr);
-
-    MH_DisableHook(pollEventPtr);
-    MH_RemoveHook(pollEventPtr);
+    SDL_GL_SwapWindowHook.Remove();
+    SDL_PollEventHook.Remove();
 }
 
 void ImGuiRenderer::CreateContext()
@@ -68,7 +59,7 @@ void ImGuiRenderer::SetStyle()
     // Implement default style later
 }
 
-void ImGuiRenderer::SDL_GL_SwapWindowHook(SDL_Window* window)
+void ImGuiRenderer::SDL_GL_SwapWindowHookFunc(SDL_Window* window)
 {
     if (!BackendInit)
     {
@@ -80,12 +71,12 @@ void ImGuiRenderer::SDL_GL_SwapWindowHook(SDL_Window* window)
         Draw();
         PostDraw();
     }
-    reinterpret_cast<void(*)(SDL_Window* window)>(oSDL_GL_SwapWindow)(window);
+    reinterpret_cast<void(*)(SDL_Window* window)>(SDL_GL_SwapWindowHook.OriginalFunction)(window);
 }
 
-int ImGuiRenderer::SDL_PollEventHook(SDL_Event* event)
+int ImGuiRenderer::SDL_PollEventHookFunc(SDL_Event* event)
 {
-    int result = reinterpret_cast<int(*)(SDL_Event * event)>(oSDL_PollEventHook)(event);
+    int result = reinterpret_cast<int(*)(SDL_Event * event)>(SDL_PollEventHook.OriginalFunction)(event);
 
     if (BackendInit && ContextInit)
     {
@@ -98,29 +89,21 @@ int ImGuiRenderer::SDL_PollEventHook(SDL_Event* event)
             switch (event->type)
             {
             case SDL_MOUSEMOTION:
-            case SDL_MOUSEBUTTONUP:
-            case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEWHEEL:
+            case SDL_MOUSEBUTTONDOWN:
             {
                 if (io.WantCaptureMouse || io.WantTextInput)
                 {
-                    SDL_PollEventHook(event);
-                    // prevent noita from processing event imo (in my opinion)
-                    result = 0;
-                    *event = {};
+                    result = SDL_PollEventHookFunc(event);
                 }
                 break;
             }
 
             case SDL_KEYDOWN:
-            case SDL_KEYUP:
             {
                 if (io.WantTextInput)
                 {
-                    SDL_PollEventHook(event);
-                    // prevent noita from processing event imo (in my opinion)
-                    result = 0;
-                    *event = {};
+                    result = SDL_PollEventHookFunc(event);
                 }
                 break;
             }
@@ -145,22 +128,42 @@ void ImGuiRenderer::Draw()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::Begin("Test");
+    static float f = 0.0f;
+    f += io.DeltaTime;
+
+    ImGui::Begin("Test", nullptr, ImGuiWindowFlags_MenuBar);
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Misc."))
+        {
+            if (ImGui::MenuItem("Unload"))
+            {
+                NoiternalLoader::Unload();
+            }
+
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    ImGui::Text("Lua State: %s", (LuaExecutor::GameState == nullptr || LuaExecutor::GameState->LuaState == nullptr) ? "invalid" : "valid");
 
     if (ImGui::Button("Run"))
     {
-        if (LuaExecutor::GameState == nullptr || LuaExecutor::GameState->LuaState == nullptr)
-        {
-            std::cout << "Invalid Lua State\n";
-        }
-        else
+        if (LuaExecutor::GameState != nullptr && LuaExecutor::GameState->LuaState != nullptr)
         {
             luaL_dostring(LuaExecutor::GameState->LuaState, workingLuaText.c_str());
         }
     }
-    ImGui::InputTextMultiline("##Lua", &workingLuaText);
+    ImGui::InputTextMultiline("##Lua", &workingLuaText, ImGui::GetContentRegionAvail());
 
     ImGui::End();
+
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+    // floating circle for debugging, very cool chair, thank you
+    //drawList->AddCircleFilled(ImVec2(100.0f, 50.0f + (0.5f + cosf(f) * 0.5f) * 1000.0f), 20.0f, 0xFF0000FF);
 }
 
 void ImGuiRenderer::PostDraw()

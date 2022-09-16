@@ -5,28 +5,27 @@
 
 LuaManager* LuaExecutor::GameState = nullptr;
 
-void* oLuaManagerNewState = nullptr;
-void __fastcall LuaManagerNewStateHook(LuaManager* pThis)
-{
-    reinterpret_cast<void(*)(LuaManager* pThis)>(oLuaManagerNewState)(pThis);
-    LuaExecutor::GameState = pThis;
-}
-
 void ResetGameLua()
 {
     // sus af
     *(uint8_t*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEEDS_RESET_LUA_VAR) = 0;
 }
 
+Hook LuaManagerNewStateHook;
+void __fastcall LuaManagerNewStateHookFunc(LuaManager* pThis)
+{
+    reinterpret_cast<void(*)(LuaManager* pThis)>(LuaManagerNewStateHook.OriginalFunction)(pThis);
+    LuaExecutor::GameState = pThis;
+}
+
 void LuaExecutor::HookLua()
 {
-    MH_CreateHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA), LuaManagerNewStateHook, &oLuaManagerNewState);
-    MH_EnableHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA));
+    LuaManagerNewStateHook = Hook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA), LuaManagerNewStateHookFunc);
+    LuaManagerNewStateHook.Enable();
     
     ResetGameLua();
 }
 void LuaExecutor::UnhookLua()
 {
-    MH_DisableHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA));
-    MH_RemoveHook((void*)(NoiternalLoader::NoitaModuleAddress + NOITA_NEW_LUA));
+    LuaManagerNewStateHook.Remove();
 }

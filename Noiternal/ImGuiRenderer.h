@@ -7,7 +7,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include <MinHook.h>
+#include "Hook.h"
 
 
 class ImGuiRenderer
@@ -30,6 +30,6 @@ private:
     static void Draw();
     static void PostDraw();
 
-    static void SDL_GL_SwapWindowHook(SDL_Window* window);
-    static int SDL_PollEventHook(SDL_Event* event);
+    static void SDL_GL_SwapWindowHookFunc(SDL_Window* window);
+    static int SDL_PollEventHookFunc(SDL_Event* event);
 };
