@@ -61,6 +61,8 @@ void ImGuiRenderer::SetStyle()
 
 void ImGuiRenderer::SDL_GL_SwapWindowHookFunc(SDL_Window* window)
 {
+    auto oSDL_GL_SwapWindow = HFUNC(void, (SDL_Window* window), SDL_GL_SwapWindowHook.OriginalFunction);
+
     if (!BackendInit)
     {
         CreateBackend(SDL_GL_GetCurrentWindow(), SDL_GL_GetCurrentContext());
@@ -71,20 +73,22 @@ void ImGuiRenderer::SDL_GL_SwapWindowHookFunc(SDL_Window* window)
         Draw();
         PostDraw();
     }
-    reinterpret_cast<void(*)(SDL_Window* window)>(SDL_GL_SwapWindowHook.OriginalFunction)(window);
+    oSDL_GL_SwapWindow(window);
 }
 
 int ImGuiRenderer::SDL_PollEventHookFunc(SDL_Event* event)
 {
-    int result = reinterpret_cast<int(*)(SDL_Event * event)>(SDL_PollEventHook.OriginalFunction)(event);
+    
+    auto oSDL_PollEvent = HFUNC(int, (SDL_Event* event), SDL_PollEventHook.OriginalFunction);
 
-    if (BackendInit && ContextInit)
+    int result = oSDL_PollEvent(event);
+
+    if (ContextInit && BackendInit)
     {
         if (event && result)
         {
-            ImGui_ImplSDL2_ProcessEvent(event);
-
             ImGuiIO& io = ImGui::GetIO();
+            ImGui_ImplSDL2_ProcessEvent(event);
 
             switch (event->type)
             {
@@ -128,9 +132,6 @@ void ImGuiRenderer::Draw()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    static float f = 0.0f;
-    f += io.DeltaTime;
-
     ImGui::Begin("Test", nullptr, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
@@ -161,9 +162,6 @@ void ImGuiRenderer::Draw()
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-
-    // floating circle for debugging, very cool chair, thank you
-    //drawList->AddCircleFilled(ImVec2(100.0f, 50.0f + (0.5f + cosf(f) * 0.5f) * 1000.0f), 20.0f, 0xFF0000FF);
 }
 
 void ImGuiRenderer::PostDraw()

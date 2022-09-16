@@ -2,6 +2,8 @@
 #include "framework.h"
 #include <MinHook.h>
 
+#define HFUNC(returnValue, parameters, original) (returnValue(*)parameters)(original)
+
 class Hook
 {
 public:

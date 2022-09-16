@@ -14,7 +14,9 @@ void ResetGameLua()
 Hook LuaManagerNewStateHook;
 void __fastcall LuaManagerNewStateHookFunc(LuaManager* pThis)
 {
-    reinterpret_cast<void(*)(LuaManager* pThis)>(LuaManagerNewStateHook.OriginalFunction)(pThis);
+    auto oLuaManagerNewState = HFUNC(void, (LuaManager* pThis), LuaManagerNewStateHook.OriginalFunction);
+    oLuaManagerNewState(pThis);
+
     LuaExecutor::GameState = pThis;
 }
 
